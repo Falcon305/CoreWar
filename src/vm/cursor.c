@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cursor.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hrazani <hrazani@student.1337.ma>          +#+  +:+       +#+        */
+/*   By: hrazani <hrazani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/27 19:11:22 by hrazani           #+#    #+#             */
-/*   Updated: 2020/02/28 15:16:34 by hrazani          ###   ########.fr       */
+/*   Updated: 2020/03/07 18:30:00 by hrazani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,12 +34,14 @@ t_cursor                    *make_cursor(void)
 
 t_queue     *make_affect_cursor(void *arena, t_player *players)
 {
-    t_queue     *queue;
+    t_queue     *queue; // Stack Or Queue ??
+    t_stack     *stack;
     t_player    *temp;
     t_cursor   *cursor;
     int         jumper;
 
     temp = players;
+    init_stack(stack);
     queue = ft_new_queue();
     jumper = 0;
     while (temp)
@@ -47,11 +49,7 @@ t_queue     *make_affect_cursor(void *arena, t_player *players)
         cursor = make_cursor();
         cursor->current_op = arena;
         ft_enque(queue, cursor);
-       /*
-        * printf("%x", ((int*)cursor->current_op)[0] << 8 | ((int*)cursor->current_op)[1]);
-        * exit(120);
-        */
-
+        printf(" ID = %d\n", cursor->id);
        temp = temp->next;
     }
     return (NULL);

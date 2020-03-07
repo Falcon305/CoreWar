@@ -6,7 +6,7 @@
 /*   By: hrazani <hrazani@student.1337.ma>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/27 19:07:27 by hrazani           #+#    #+#             */
-/*   Updated: 2020/02/28 17:44:49 by hrazani          ###   ########.fr       */
+/*   Updated: 2020/03/01 15:04:28 by hrazani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,24 +14,24 @@
 
 t_player                   *parse_players(char **argv, int argc, int *number)
 {
-    int  hopper;
-    t_player *player;
-    t_player *temp;
-    int       fd;
+    int         i;
+    t_player    *player;
+    t_player    *temp;
+    int         fd;
 
     if (argc > 5 || argc < 2)
         ft_error("INCORRECT NUMBER OF ARGUMENT");
-    hopper = 0;
+    i = 0;
     if (!(player = (t_player*)malloc(sizeof(t_player))))
         ft_error("ALLOCATION ERROR");
     player->id = 1;
     player->prev = NULL;
     temp = player;
-    while (++hopper < argc)
+    while (++i < argc)
     {
-        fd = open(argv[hopper], O_RDONLY);
+        fd = open(argv[i], O_RDONLY);
         parse_header(fd);
-        temp->id = hopper;
+        temp->id = i;
         (*number)++;
         temp->name = parse_name(fd);
         temp->exec_size = ft_read_file(fd, 4);
@@ -39,7 +39,7 @@ t_player                   *parse_players(char **argv, int argc, int *number)
         if (!check_0x0(fd))
             ft_error("COMMENT DONT END WITH 0x0");
         temp->exec_code = parse_exec(fd, temp->exec_size);
-        if (hopper + 1 < argc)
+        if (i + 1 < argc)
         {
             if (!(temp->next = (t_player*)malloc(sizeof(t_player))))
                 ft_error("ALLOCATION ERROR");

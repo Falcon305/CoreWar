@@ -6,7 +6,7 @@
 /*   By: hrazani <hrazani@student.1337.ma>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/25 14:53:47 by hrazani           #+#    #+#             */
-/*   Updated: 2020/02/28 17:44:48 by hrazani          ###   ########.fr       */
+/*   Updated: 2020/03/03 19:00:37 by hrazani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,8 +35,184 @@ typedef enum            e_regs {
 
 typedef struct          s_op
 {
-    char    *name;
+    uint8_t             code;
+    char                *name;
+    int                 args_num;
+    int                 type;
+    uint8_t             types[3];
+    int                 carry_modif;
+    uint8_t             t_dir_size;
+    uint32_t            cycles;
 }                       t_op;
+
+typedef struct			s_stack
+{
+	int					data;
+	struct s_stack		*next;
+}						t_stack;
+
+static t_op						op_tab[16] =  {
+    {
+        .code = 0x01,
+        .name = "live",
+        .args_num = 1,
+        .type = FALSE,
+        .types = {T_DIR, 0, 0},
+        .carry_modif = FALSE,
+        .t_dir_size = 4,
+        .cycles = 10,
+    },
+    {
+        .code = 0x02,
+        .name = "ld",
+        .args_num = 2,
+        .type = 1,
+        .types = {T_DIR | T_IND, T_REG, 0},
+        .carry_modif = TRUE,
+        .t_dir_size = 4,
+        .cycles = 5,
+    },
+    {
+        .code = 0x03,
+        .name = "st",
+        .args_num = 2,
+        .type = TRUE,
+        .types = {T_REG, T_REG | T_IND, 0},
+        .carry_modif = FALSE,
+        .t_dir_size = 4,
+        .cycles = 5,
+    },
+    {
+        .code = 0x04,
+        .name = "add",
+        .args_num = 3,
+        .type = TRUE,
+        .types = {T_REG, T_REG, T_REG},
+        .carry_modif = TRUE,
+        .t_dir_size = 4,
+        .cycles = 10,
+    },
+    {
+        .code = 0x05,
+        .name = "sub",
+        .args_num = 3,
+        .type = TRUE,
+        .types = {T_REG, T_REG, T_REG},
+        .carry_modif = TRUE,
+        .t_dir_size = 4,
+        .cycles = 10,
+    },
+    {
+        .code = 0x06,
+        .name = "and",
+        .args_num = 3,
+        .type = TRUE,
+        .types = {T_REG | T_DIR | T_IND, T_REG | T_DIR | T_IND, T_REG},
+        .carry_modif = TRUE,
+        .t_dir_size = 4,
+        .cycles = 6,
+    },
+    {
+        .code = 0x07,
+        .name = "or",
+        .args_num = 3,
+        .type = TRUE,
+        .types = {T_REG | T_DIR | T_IND, T_REG | T_DIR | T_IND, T_REG},
+        .carry_modif = TRUE,
+        .t_dir_size = 4,
+        .cycles = 6,
+    },
+    {
+        .code = 0x08,
+        .name = "xor",
+        .args_num = 1,
+        .type = TRUE,
+        .types = {T_REG | T_DIR | T_IND, T_REG | T_DIR | T_IND, T_REG},
+        .carry_modif = TRUE,
+        .t_dir_size = 4,
+        .cycles = 6,
+    },
+    {
+        .code = 0x09,
+        .name = "zjmp",
+        .args_num = 1,
+        .type = FALSE,
+        .types = {T_DIR, 0, 0},
+        .carry_modif = FALSE,
+        .t_dir_size = 2,
+        .cycles = 20,
+    },
+    {
+        .code = 0x0a,
+        .name = "ldi",
+        .args_num = 3,
+        .type = TRUE,
+        .types = {T_REG | T_DIR | T_IND, T_REG | T_DIR, T_REG},
+        .carry_modif = FALSE,
+        .t_dir_size = 2,
+        .cycles = 25,
+    },
+    {
+        .code = 0x0b,
+        .name = "sti",
+        .args_num = 3,
+        .type = TRUE,
+        .types = {T_REG, T_REG | T_DIR | T_IND, T_REG | T_DIR},
+        .carry_modif = FALSE,
+        .t_dir_size = 2,
+        .cycles = 25,
+    },
+    {
+        .code = 0x0c,
+        .name = "fork",
+        .args_num = 1,
+        .type = FALSE,
+        .types = {T_REG, 0, 0},
+        .carry_modif = FALSE,
+        .t_dir_size = 2,
+        .cycles = 800,
+    },
+    {
+        .code = 0x0d,
+        .name = "lld",
+        .args_num = 2,
+        .type = TRUE,
+        .types = {T_DIR | T_IND, T_REG, 0},
+        .carry_modif = TRUE,
+        .t_dir_size = 4,
+        .cycles = 10,
+    },
+    {
+        .code = 0x0e,
+        .name = "lldi",
+        .args_num = TRUE,
+        .type = 0,
+        .types = {T_REG | T_DIR | T_IND, T_REG | T_DIR, T_REG},
+        .carry_modif = TRUE,
+        .t_dir_size = 2,
+        .cycles = 50,
+    },
+    {
+        .code = 0x0f,
+        .name = "lfork",
+        .args_num = 1,
+        .type = FALSE,
+        .types = {T_DIR, 0, 0},
+        .carry_modif = FALSE,
+        .t_dir_size = 2,
+        .cycles = 1000,
+    },
+    {
+        .code = 0x10,
+        .name = "aff",
+        .args_num = 1,
+        .type = TRUE,
+        .types = {T_REG, 0, 0},
+        .carry_modif = FALSE,
+        .t_dir_size = 4,
+        .cycles = 2,
+    },
+};
 
 typedef struct          s_player
 {
@@ -95,6 +271,17 @@ t_vm                    *init_vm(t_player *players);
 void                    *last_player(t_player *players);
 /*
 ** ----------------------------------------------------------------------------
+** 						  	Stack functions
+** ----------------------------------------------------------------------------
+*/
+void					init_stack(t_stack *head);
+t_stack					*push(t_stack *head, int data);
+t_stack					*pop(t_stack *head, int *element);
+int						empty(t_stack *head);
+int						stack_len(t_stack *path);
+void		            free_stack(t_stack *stack);
+/*
+** ----------------------------------------------------------------------------
 ** 						  	Cursor functions
 ** ----------------------------------------------------------------------------
 */
@@ -108,197 +295,5 @@ t_queue                 *make_affect_cursor(void *arena, t_player   *players);
 void                    DB_show_players(t_player *player, int norm_rev);
 void                    DB_show_vm(t_vm *vm);
 void	                DB_show_arena(unsigned char *arena);
-
-
-/*typedef struct          s_op
-{
-    uint8_t             code;
-    char                *name;
-    int                 args_num;
-    int                 type;
-    uint8_t             types[3];
-    int                 carry_modif;
-    uint8_t             t_dir_size;
-    uint32_t            cycles;
-}                       t_op;
-
-static t_op                    op_tab[17]
-{
-    {
-        .code = 0x01,
-        .name = "live",
-        .args_num = 1,
-        .type = 0;
-        .types = {T_DIR, 0, 0},
-        .carry_modif = 0,
-        .t_dir_size = 4,
-        .cycles = 10,
-    },
-
-    {
-        .code = 0x02,
-        .name = "ld",
-        .args_num = 2,
-        .type = 1;
-        .types = {T_DIR | T_IND, T_REG, 0},
-        .carry_modif = 1,
-        .t_dir_size = 4,
-        .cycles = 5,
-    },
-    
-    {
-        .code = 0x03,
-        .name = "st",
-        .args_num = 2,
-        .type = 1;
-        .types = {T_REG, T_REG | T_IND, 0},
-        .carry_modif = 0,
-        .t_dir_size = 4,
-        .cycles = 5,
-    },
-
-    {
-        .code = 0x01,
-        .name = "live",
-        .args_num = 1,
-        .type = 0;
-        .types = {T_DIR, 0, 0},
-        .carry_modif = 0,
-        .t_dir_size = 4,
-        .cycles = 10,
-    },
-
-    {
-        .code = 0x01,
-        .name = "live",
-        .args_num = 1,
-        .type = 0;
-        .types = {T_DIR, 0, 0},
-        .carry_modif = 0,
-        .t_dir_size = 4,
-        .cycles = 10,
-    },
-
-    {
-        .code = 0x01,
-        .name = "live",
-        .args_num = 1,
-        .type = 0;
-        .types = {T_DIR, 0, 0},
-        .carry_modif = 0,
-        .t_dir_size = 4,
-        .cycles = 10,
-    },
-
-    {
-        .code = 0x01,
-        .name = "live",
-        .args_num = 1,
-        .type = 0;
-        .types = {T_DIR, 0, 0},
-        .carry_modif = 0,
-        .t_dir_size = 4,
-        .cycles = 10,
-    },
-
-    {
-        .code = 0x01,
-        .name = "live",
-        .args_num = 1,
-        .type = 0;
-        .types = {T_DIR, 0, 0},
-        .carry_modif = 0,
-        .t_dir_size = 4,
-        .cycles = 10,
-    },
-
-    {
-        .code = 0x01,
-        .name = "live",
-        .args_num = 1,
-        .type = 0;
-        .types = {T_DIR, 0, 0},
-        .carry_modif = 0,
-        .t_dir_size = 4,
-        .cycles = 10,
-    },
-
-    {
-        .code = 0x01,
-        .name = "live",
-        .args_num = 1,
-        .type = 0;
-        .types = {T_DIR, 0, 0},
-        .carry_modif = 0,
-        .t_dir_size = 4,
-        .cycles = 10,
-    },
-
-    {
-        .code = 0x01,
-        .name = "live",
-        .args_num = 1,
-        .type = 0;
-        .types = {T_DIR, 0, 0},
-        .carry_modif = 0,
-        .t_dir_size = 4,
-        .cycles = 10,
-    },
-
-    {
-        .code = 0x01,
-        .name = "live",
-        .args_num = 1,
-        .type = 0;
-        .types = {T_DIR, 0, 0},
-        .carry_modif = 0,
-        .t_dir_size = 4,
-        .cycles = 10,
-    },
-
-    {
-        .code = 0x01,
-        .name = "live",
-        .args_num = 1,
-        .type = 0;
-        .types = {T_DIR, 0, 0},
-        .carry_modif = 0,
-        .t_dir_size = 4,
-        .cycles = 10,
-    },
-
-    {
-        .code = 0x01,
-        .name = "live",
-        .args_num = 1,
-        .type = 0;
-        .types = {T_DIR, 0, 0},
-        .carry_modif = 0,
-        .t_dir_size = 4,
-        .cycles = 10,
-    },
-
-    {
-        .code = 0x01,
-        .name = "live",
-        .args_num = 1,
-        .type = 0;
-        .types = {T_DIR, 0, 0},
-        .carry_modif = 0,
-        .t_dir_size = 4,
-        .cycles = 10,
-    },
-
-    {
-        .code = 0x01,
-        .name = "live",
-        .args_num = 1,
-        .type = 0;
-        .types = {T_DIR, 0, 0},
-        .carry_modif = 0,
-        .t_dir_size = 4,
-        .cycles = 10,
-    },
-};*/
 
 #endif
