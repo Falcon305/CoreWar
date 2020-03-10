@@ -6,20 +6,21 @@
 /*   By: hrazani <hrazani@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/27 19:11:22 by hrazani           #+#    #+#             */
-/*   Updated: 2020/03/07 18:30:00 by hrazani          ###   ########.fr       */
+/*   Updated: 2020/03/10 19:48:50 by hrazani          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/corewar.h"
 
+
+
 t_cursor                    *make_cursor(void)
 {
     t_cursor   *cursor;
     static int  id;
-    //t_regs      regs;
-
+    
     if (!(cursor = (t_cursor*)malloc(sizeof(t_cursor))))
-        ft_error("cursor ALLOCATION ERROR");
+        ft_error("CURSOR ALLOCATION ERROR");
     cursor->id = id;
     cursor->carry = FALSE;
     cursor->current_op = NULL;
